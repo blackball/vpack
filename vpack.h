@@ -16,8 +16,10 @@
 
 #ifdef __cplusplus
 #define EXTERN_BEGIN extern "C" {
-#else
 #define EXTERN_END   }
+#else
+#define EXTERN_BEGIN
+#define EXTERN_END
 #endif
 
 #if CHAR_BIT != 8
