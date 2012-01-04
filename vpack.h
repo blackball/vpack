@@ -1,9 +1,9 @@
 /**
  * A simple & plain data (un)serilization lib.
  *
- * Made load and store process not that painful.
+ * Making load and store process not that painful.
  *
- * Anyway, this is a tiny utils in my dailylife.
+ * Anyway, this is a tiny utils wrote for my dailylife.
  *
  * @blackball <bugway@gmail.com>
  */

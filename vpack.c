@@ -190,10 +190,10 @@ static int vadditem(struct _vproctab *tab, const char c, void *data, int n)
   vcpfunc func = NULL;
   switch(c)
   {
-    case 'c': gidx = 0; sz = sizeof(char);  func = &vcpchar;    break;
-    case 's': gidx = 1; sz = sizeof(short); func = &vcpshort;   break;
-    case 'i': gidx = 2; sz = sizeof(int);   func = &vcpint;     break;
-    case 'l': gidx = 3; sz = sizeof(long);  func = &vcplong;    break;
+    case 'c': gidx = 0; sz = sizeof(char);   func = &vcpchar;   break;
+    case 's': gidx = 1; sz = sizeof(short);  func = &vcpshort;  break;
+    case 'i': gidx = 2; sz = sizeof(int);    func = &vcpint;    break;
+    case 'l': gidx = 3; sz = sizeof(long);   func = &vcplong;   break;
     case 'f': gidx = 4; sz = sizeof(float);  func = &vcpfloat;  break;
     case 'd': gidx = 5; sz = sizeof(double); func = &vcpdouble; break;
     default: return -1; /* error */
@@ -208,6 +208,7 @@ static int vadditem(struct _vproctab *tab, const char c, void *data, int n)
   tab->items[icnt].func = func;      
   tab->items[icnt].pdata = data;        
   tab->items[icnt].n = n;
+
   ++ tab->cnt;
 
   return 0;
@@ -222,7 +223,7 @@ static int vadditem(struct _vproctab *tab, const char c, void *data, int n)
  * @param fmt format string
  * @param ap va_list pointing to the first var.
  *
- * @return if fmt is valid return 0, else -1
+ * @return 0 if fmt is valid, else -1
  */
 static int vpreparse(struct _vproctab *tab, const char *fmt, va_list ap)
 {
@@ -254,6 +255,7 @@ static int vpreparse(struct _vproctab *tab, const char *fmt, va_list ap)
         vadditem(tab, c, data, len);
         break;     
       default:
+        /* error, @TODO give more msg */
         assert(0);
         break;
     } 
@@ -275,14 +277,14 @@ static int vpreparse(struct _vproctab *tab, const char *fmt, va_list ap)
  * an type type array, which has len elements.nested structs
  * is not supported.
  *
- * const char *fmt = "cciiff#";
- * vpack(model, fmt,)
+ * @param fn filename that will create to store data
+ * @param fmt format string
+ * @return 0 if OK, else -1
  */
 int vpack(const char *fn, const char* fmt, ...)
 {
   FILE *f = NULL;
   void *mem = NULL, *p = NULL;
-  char *flags = NULL;
   struct _vproctab vproctab = {0};
   int i;
   
@@ -292,13 +294,11 @@ int vpack(const char *fn, const char* fmt, ...)
   va_end(ap);
 
   /* pack header */
-  f = fopen(fn, "wb");
-  assert(f != NULL);
   mem = malloc(vproctab.memsz + sizeof(char)*8);
   assert(mem != NULL);
   p = mem;
-  flags = vproctab.guard.flags;
-  vcpchar(&p, (void**)(&flags), 8, 0);
+  
+  vcpchar(&p, (void**)(&(vproctab.guard.flags)), 8, 0);
 
   /* pack data */
   for (i = 0; i < vproctab.cnt; ++i)
@@ -306,6 +306,14 @@ int vpack(const char *fn, const char* fmt, ...)
                            (void**)(&(vproctab.items[i].pdata)),
                            vproctab.items[i].n, 0);
   
+  f = fopen(fn, "wb");
+  if (f==NULL)
+  {
+    /* @TODO give more msg */
+    free(mem);
+    return -1;
+  }
+
   fwrite(mem, vproctab.memsz + sizeof(char)*8, 1, f);
 
   fclose(f);
