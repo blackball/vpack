@@ -215,7 +215,7 @@ static int vadditem(struct _vproctab *tab, const char c, void *data, int n)
 }
 
 /**
- * pre-parse the format string from tail to head
+ * pre-parse the format string from head to tail
  * to get needed information. this will skip all
  * spaces including:
  * ' ', '\n', '\t', '\v', '\f', '\r'
@@ -231,7 +231,6 @@ static int vpreparse(struct _vproctab *tab, const char *fmt, va_list ap)
   void *data;
   int cnt = 0,len = 0;
 
-  /* point to the last none '\0' char */
   const char *pc = fmt; 
 
   /* endianess, @TODO 6 is not a good way to make a extend */
