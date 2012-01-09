@@ -107,7 +107,8 @@ static int vgetfuncidx(const char c)
  */
 #define _vmakecpfunc(suffix, type)                                      \
   static void vcp##suffix(void **dst, void **src, int n, int icrwho)    \
-  {   type *pd = (type*)(*dst);                                         \
+  {                                                                     \
+    type *pd = (type*)(*dst);                                           \
     type *ps = (type*)(*src);                                           \
     memcpy(*dst, *src, sizeof(type)*n);                                 \
     if (icrwho) /* == 1*/                                               \
@@ -141,6 +142,7 @@ static vcpfunc vfunctab[] =
 #undef _vcpfunc
 */
 
+
 /* get last non-blank char*/
 #define _vskip(c)                               \
   while(1){                                     \
@@ -173,6 +175,7 @@ struct _vproctab
   struct _vprocitem items[V_VAR_LEN];
 };
 
+
 /**
  * Add one item into proccess tab.
  *
@@ -188,6 +191,7 @@ static int vadditem(struct _vproctab *tab, const char c, void *data, int n)
   int sz = -1;
   int gidx = -1;
   vcpfunc func = NULL;
+
   switch(c)
   {
     case 'c': gidx = 0; sz = sizeof(char);   func = &vcpchar;   break;
@@ -253,6 +257,7 @@ static int vpreparse(struct _vproctab *tab, const char *fmt, va_list ap)
         len = (*(pc+1) == '#' ? pc ++, va_arg(ap,int): 1);
         vadditem(tab, c, data, len);
         break;     
+
       default:
         /* error, @TODO give more msg */
         assert(0);
@@ -263,6 +268,7 @@ static int vpreparse(struct _vproctab *tab, const char *fmt, va_list ap)
   }
   return 0;
 }
+
 #undef _vskip
 
 /**
