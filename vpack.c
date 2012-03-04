@@ -129,17 +129,17 @@ _vmakecpfunc(double, double)
 typedef void (* vcpfunc)(void **, void **, int, int);
 
 /*
-#define _vcpfunc(name, id) &vcp##name
-static vcpfunc vfunctab[] =
-{
+  #define _vcpfunc(name, id) &vcp##name
+  static vcpfunc vfunctab[] =
+  {
   _vcpfunc(char,   0),
   _vcpfunc(short,  1),
   _vcpfunc(int,    2),
   _vcpfunc(long,   3),
   _vcpfunc(float,  4),
   _vcpfunc(double, 5),
-};
-#undef _vcpfunc
+  };
+  #undef _vcpfunc
 */
 
 
@@ -339,7 +339,7 @@ int vget(const char *fn, const char *fmt, ...)
   int i;
   FILE *f;
   void *mem = NULL,
-       *p = NULL;
+      *p = NULL;
   va_list ap;
   
   struct _vproctab vproctab = {0}; /* parse from format string */

@@ -1,3 +1,9 @@
+/**
+ * Unit test for vpack.
+ *
+ * @blackball
+ */
+
 #include "vpack.h"
 #include <stdio.h>
 
