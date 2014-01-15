@@ -1,15 +1,11 @@
 /**
- * A simple & plain data (un)serilization lib.
- *
+ * A simple one-shot plain data (un)serilization lib.
  * Making load and store process not that painful.
- *
- * Anyway, this is a tiny utils wrote for my dailylife.
- *
- * @blackball <bugway@gmail.com>
+ * @blackball
  */
 
-#ifndef vpack_h
-#define vpack_h
+#ifndef VPACK_H
+#define VPACK_H
 
 #include <limits.h>
 #include <stdarg.h>
@@ -35,7 +31,7 @@ EXTERN_BEGIN
  * @param fmt format string
  * @return 0 for success, else -1 
  */
-int vpack(const char *fn, const char *fmt, ...);
+int vpack_save(const char *fn, const char *fmt, ...);
 
 /**
  * Unpack plain data from a binary file.
@@ -44,7 +40,7 @@ int vpack(const char *fn, const char *fmt, ...);
  * @param fmt format string
  * @return 0 for success, else -1
  */
-int vget(const char *fn, const char *fmt, ...);
+int vpack_load(const char *fn, const char *fmt, ...);
 
 EXTERN_END
 
