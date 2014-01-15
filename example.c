@@ -7,25 +7,29 @@
 #include "vpack.h"
 #include <stdio.h>
 
-struct Model {
+const char *fmt_str = "cisfdc#";
+struct model_t {
         char c;
-        int pts[4];
-        float vec[1024];
+        int i;
+        short s;
+        float f;
+        double d;
+        char name[10];
 };
   
 int main(int argc, char *argv[]) {
-        struct Model model = {0};
+        struct model_t model = {'a', 23, 21, 1.4, 2.3, {'h', 'e', '\0'}};
 
         /* fill model */
 
-        if (vpack_save("model.b", "ci#f#", &(model.c), model.pts, 4, model.vec, 1024)) {
+        if (vpack_save("model.b", fmt_str, &(model.c), &(model.i), &(model.s), &(model.f), &(model.d), model.name, 10)) {
                 fprintf(stderr, "Error: some error ocurs while saving model.\n");
                 return -1;
         }
 
         /* when you need use model above */
 
-        if (vpack_load("model.b", "ci#f#", &(model.c), model.pts, 4, model.vec, 1024)) {
+        if (vpack_load("model.b", fmt_str, &(model.c), &(model.i), &(model.s), &(model.f), &(model.d), model.name, 10)) {
                 fprintf(stderr, "Error: some error ocurs while reading model.\n");
                 return -1;
         }
