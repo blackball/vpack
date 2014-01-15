@@ -14,8 +14,8 @@ EXTERN_BEGIN
 
 /**
  * Since I just support CHAR_BIT == 8,
- * I could gain more confidence to have a 
- * check flag to check if the loaded file 
+ * I could gain more confidence to have a
+ * check flag to check if the loaded file
  * is suitable on new system.
  *
  * we should handle:
@@ -36,7 +36,7 @@ vpack_getendian() {
  * 2. used or not ?
  */
 
-/*  
+/*
     char vguard[8] = {
     sizeof(char),
     sizeof(short),
@@ -66,7 +66,7 @@ vpack_checkguard(struct _vguard *file, struct _vguard *local) {
                 if (file->flags[i] != 0 &&
                     file->flags[i] != local->flags[i])
                         return -1;
-  
+
         return 0;
 }
 
@@ -81,7 +81,7 @@ vpack_getfuncidx(const char c) {
         case 'f': return 4;
         case 'd': return 5;
         }
-        // error 
+        // error
         return -1;
 }
 
@@ -89,7 +89,7 @@ vpack_getfuncidx(const char c) {
  * copy data.
  *
  * @param dst destination mem block
- * @param src data source 
+ * @param src data source
  * @param n length of src, >= 1
  * @param incrwho 0->dst 1->src
  */
@@ -104,7 +104,7 @@ vpack_getfuncidx(const char c) {
                 else                                                    \
                         *dst = (void*)(pd + n);                         \
         }
-   
+
 VPACK_MAKECPFUNC(char,   char)
 VPACK_MAKECPFUNC(short,  short)
 VPACK_MAKECPFUNC(int,    int)
@@ -186,15 +186,15 @@ vpack_additem(struct _vproctab *tab, const char c, void *data, int n) {
         case 'd': gidx = 5; sz = sizeof(double); func = &vpack_cpdouble; break;
         default: return -1; /* error */
         }
-  
+
         icnt = tab->cnt;
         assert(icnt+1 < V_VAR_LEN);
 
-        tab->memsz += sz*(n);                       
-        tab->guard.flags[gidx] |= sz;                     
-  
-        tab->items[icnt].func = func;      
-        tab->items[icnt].pdata = data;        
+        tab->memsz += sz*(n);
+        tab->guard.flags[gidx] |= sz;
+
+        tab->items[icnt].func = func;
+        tab->items[icnt].pdata = data;
         tab->items[icnt].n = n;
 
         ++ tab->cnt;
@@ -217,21 +217,21 @@ static int
 vpack_preparse(struct _vproctab *tab, const char *fmt, va_list ap) {
         char c;
         void *data;
-        int cnt = 0,len = 0;
+        int len = 0;
 
-        const char *pc = fmt; 
+        const char *pc = fmt;
 
         /* endianess, @TODO 6 is not a good way to make a extend */
         tab->guard.flags[6] = vpack_getendian();
-  
+
         while (*pc != '\0')
         {
                 VPACK_SKIP(pc);
                 c = *pc;
-    
+
                 switch(c)
                 {
-                case 'c':  
+                case 'c':
                 case 's':
                 case 'i':
                 case 'l':
@@ -240,13 +240,13 @@ vpack_preparse(struct _vproctab *tab, const char *fmt, va_list ap) {
                         data = va_arg(ap, void*);
                         len = (*(pc+1) == '#' ? pc ++, va_arg(ap,int): 1);
                         vpack_additem(tab, c, data, len);
-                        break;     
+                        break;
 
                 default:
                         /* error, @TODO give more msg */
                         assert(0);
                         break;
-                } 
+                }
 
                 ++ pc;
         }
@@ -260,7 +260,7 @@ vpack_preparse(struct _vproctab *tab, const char *fmt, va_list ap) {
  *
  * First, parse the format string, gain information to
  * allocate whole memory, and copy data into memory.
- * we support char, short, int, long, float, double; 
+ * we support char, short, int, long, float, double;
  * the abbreviations is: c,s,i,l,f,d.
  * and Array is supported,using "type#", means,
  * an type type array, which has len elements.nested structs
@@ -274,28 +274,30 @@ vpack_preparse(struct _vproctab *tab, const char *fmt, va_list ap) {
 int
 vpack_save(const char *fn, const char* fmt, ...) {
         FILE *f = NULL;
-        void *mem = NULL, *p = NULL;
+        void *mem = NULL, *p = NULL, *tp = NULL;
         struct _vproctab vproctab = {0};
         int i;
-  
+
         va_list ap;
         va_start(ap, fmt);
-        vpack_preparse(&vproctab, fmt, ap);  
+        vpack_preparse(&vproctab, fmt, ap);
         va_end(ap);
 
         /* pack header */
         mem = malloc(vproctab.memsz + sizeof(char)*8);
         assert(mem != NULL);
         p = mem;
-  
-        vpack_cpchar(&p, (void**)(&(vproctab.guard.flags)), 8, 0);
+
+        tp = (vproctab.guard.flags);
+
+        vpack_cpchar(&p, &tp, 8, 0);
 
         /* pack data */
         for (i = 0; i < vproctab.cnt; ++i)
                 vproctab.items[i].func(&p,
                                        (void**)(&(vproctab.items[i].pdata)),
                                        vproctab.items[i].n, 0);
-  
+
         f = fopen(fn, "wb");
         if (f==NULL)
         {
@@ -308,12 +310,12 @@ vpack_save(const char *fn, const char* fmt, ...) {
 
         fclose(f);
         free(mem);
-  
+
         return 0;
 }
 
 /**
- * Give the filename, and the format string used 
+ * Give the filename, and the format string used
  * when pack the file, we could load the file correctly,
  * if the platform is different, and we that won't hurt,
  * then warning will give, if it really hurts, it will
@@ -327,9 +329,9 @@ vpack_load(const char *fn, const char *fmt, ...) {
         void *mem = NULL,
                 *p = NULL;
         va_list ap;
-  
+
         struct _vproctab vproctab = {0}; /* parse from format string */
-        struct _vguard fileguard = {0};  /* read from file */
+        struct _vguard fileguard = {{0}};  /* read from file */
         struct _vguard local ={
                 {
                         sizeof(char),
@@ -342,7 +344,7 @@ vpack_load(const char *fn, const char *fmt, ...) {
                         0,
                 }
         };
-  
+
         /* read data */
         va_start(ap, fmt);
         vpack_preparse(&vproctab, fmt, ap);
@@ -361,11 +363,11 @@ vpack_load(const char *fn, const char *fmt, ...) {
                 fclose(f);
                 return -1;
         }
-  
+
         mem = malloc(vproctab.memsz);
         assert(mem != NULL);
         p = mem;
-  
+
         fread(p, vproctab.memsz, 1, f);
         //p = (void*)(((char*)p) + 8);
 
@@ -373,10 +375,10 @@ vpack_load(const char *fn, const char *fmt, ...) {
                 vproctab.items[i].func((void**)(&(vproctab.items[i].pdata)),
                                        &p,
                                        vproctab.items[i].n, 1);
-  
+
         fclose(f);
         free(mem);
-  
+
         return 0;
 }
 
